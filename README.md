@@ -10,7 +10,7 @@
 
 **Transform Your Interview Preparation with AI-Powered Personalized Coaching**
 
-[Features](#-features) • [Installation](#-installation) • [Usage](#-usage) • [Tech Stack](#-tech-stack) • [Architecture](#-architecture) • [Contributing](#-contributing)
+[Features](#-features) • [Usage](#-usage) • [Tech Stack](#-tech-stack) • [Architecture](#-architecture) 
 
 </div>
 
