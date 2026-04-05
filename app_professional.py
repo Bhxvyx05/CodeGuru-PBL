@@ -11,7 +11,6 @@ from utils import extract_text_from_pdf, chunk_text
 
 from skill_extractor import extract_skills, get_top_skills, categorize_skills
 from gap_analyzer import analyze_gap, get_gap_recommendations
-from star_evaluator import evaluate_answer_star, get_evaluation_color
 from difficulty_adapter import DifficultyAdapter
 from database import SessionDatabase
 
@@ -404,7 +403,7 @@ with tab2:
     else:
         jd_text = st.text_area("📋 Paste Job Description", height=200)
         
-        if jd_text and st.button("��� Analyze Gap", use_container_width=True):
+        if jd_text and st.button("📊 Analyze Gap", use_container_width=True):
             resume_text = st.session_state["resume_text"]
             skills = extract_skills(resume_text)
             gap_analysis = analyze_gap(skills, jd_text)
@@ -543,14 +542,14 @@ Return ONLY JSON, no markdown."""
                                     docs = st.session_state["vector_db"].similarity_search(current_q, k=3)
                                     context = "\n".join([d.page_content for d in docs])
                                     
-                                    eval_prompt = f"""Evaluate this interview answer on 4 dimensions (0-100 each):
+                                    eval_prompt = f"""Evaluate this interview answer (0-100 each):
 
 Question: {current_q}
 Answer: {answer}
 Resume Context: {context[:300]}
 
 Return JSON:
-{{ "relevance": 0-100, "star": 0-100, "accuracy": 0-100, "communication": 0-100, 
+{{ "relevance": 0-100, "star": 0-100, "accuracy": 0-100, "communication": 0-100,
    "feedback": "Brief feedback", "tip": "Interview tip" }}
 
 Return ONLY JSON."""
@@ -582,6 +581,20 @@ Return ONLY JSON."""
                                     st.divider()
                                     st.info(f"💬 {eval_data.get('feedback', 'N/A')}")
                                     st.success(f"🎯 Tip: {eval_data.get('tip', 'N/A')}")
+                                    
+                                    # ✅ SAVE TO PROGRESS
+                                    answer_record = {
+                                        'relevance_score': eval_data.get('relevance', 0),
+                                        'star_score': eval_data.get('star', 0),
+                                        'accuracy_score': eval_data.get('accuracy', 0),
+                                        'communication_score': eval_data.get('communication', 0),
+                                        'overall_score': (eval_data.get('relevance', 0) + eval_data.get('star', 0) + eval_data.get('accuracy', 0) + eval_data.get('communication', 0)) / 4,
+                                        'top_strength': eval_data.get('feedback', 'Good response'),
+                                        'improvement_area': 'Keep practicing',
+                                        'interview_tip': eval_data.get('tip', 'Practice more')
+                                    }
+                                    st.session_state.answers_history.append(answer_record)
+                                    st.info("✅ Answer saved to your progress!")
                                     
                                 except Exception as e:
                                     st.error(f"Error: {str(e)}")
@@ -669,7 +682,7 @@ Answer: {answer}
 Resume Context: {context[:300]}
 
 Return JSON:
-{{ "relevance": 0-100, "technical_depth": 0-100, "clarity": 0-100, "completeness": 0-100,
+{{ "relevance": 0-100, "star": 0-100, "accuracy": 0-100, "communication": 0-100,
    "feedback": "Brief feedback", "tip": "Interview tip" }}
 
 Return ONLY JSON."""
@@ -692,15 +705,29 @@ Return ONLY JSON."""
                                     with col_e1:
                                         st.metric("Relevance", f"{eval_data.get('relevance', 0)}/100")
                                     with col_e2:
-                                        st.metric("Depth", f"{eval_data.get('technical_depth', 0)}/100")
+                                        st.metric("Depth", f"{eval_data.get('star', 0)}/100")
                                     with col_e3:
-                                        st.metric("Clarity", f"{eval_data.get('clarity', 0)}/100")
+                                        st.metric("Clarity", f"{eval_data.get('accuracy', 0)}/100")
                                     with col_e4:
-                                        st.metric("Completeness", f"{eval_data.get('completeness', 0)}/100")
+                                        st.metric("Completeness", f"{eval_data.get('communication', 0)}/100")
                                     
                                     st.divider()
                                     st.info(f"💬 {eval_data.get('feedback', 'N/A')}")
                                     st.success(f"🎯 Tip: {eval_data.get('tip', 'N/A')}")
+                                    
+                                    # ✅ SAVE TO PROGRESS
+                                    answer_record = {
+                                        'relevance_score': eval_data.get('relevance', 0),
+                                        'star_score': eval_data.get('star', 0),
+                                        'accuracy_score': eval_data.get('accuracy', 0),
+                                        'communication_score': eval_data.get('communication', 0),
+                                        'overall_score': (eval_data.get('relevance', 0) + eval_data.get('star', 0) + eval_data.get('accuracy', 0) + eval_data.get('communication', 0)) / 4,
+                                        'top_strength': eval_data.get('feedback', 'Good response'),
+                                        'improvement_area': 'Keep practicing',
+                                        'interview_tip': eval_data.get('tip', 'Practice more')
+                                    }
+                                    st.session_state.answers_history.append(answer_record)
+                                    st.info("✅ Answer saved to your progress!")
                                     
                                 except Exception as e:
                                     st.error(f"Error: {str(e)}")
@@ -782,7 +809,7 @@ Answer: {answer}
 Resume Context: {context[:300]}
 
 Return JSON:
-{{ "score1": 0-100, "score2": 0-100, "score3": 0-100, "score4": 0-100,
+{{ "relevance": 0-100, "star": 0-100, "accuracy": 0-100, "communication": 0-100,
    "feedback": "Brief feedback", "tip": "Interview tip" }}
 
 Return ONLY JSON."""
@@ -803,17 +830,31 @@ Return ONLY JSON."""
                                     
                                     col_e1, col_e2, col_e3, col_e4 = st.columns(4)
                                     with col_e1:
-                                        st.metric("Relevance", f"{eval_data.get('score1', 0)}/100")
+                                        st.metric("Relevance", f"{eval_data.get('relevance', 0)}/100")
                                     with col_e2:
-                                        st.metric("Structure", f"{eval_data.get('score2', 0)}/100")
+                                        st.metric("STAR", f"{eval_data.get('star', 0)}/100")
                                     with col_e3:
-                                        st.metric("Accuracy", f"{eval_data.get('score3', 0)}/100")
+                                        st.metric("Accuracy", f"{eval_data.get('accuracy', 0)}/100")
                                     with col_e4:
-                                        st.metric("Communication", f"{eval_data.get('score4', 0)}/100")
+                                        st.metric("Communication", f"{eval_data.get('communication', 0)}/100")
                                     
                                     st.divider()
                                     st.info(f"💬 {eval_data.get('feedback', 'N/A')}")
                                     st.success(f"🎯 Tip: {eval_data.get('tip', 'N/A')}")
+                                    
+                                    # ✅ SAVE TO PROGRESS
+                                    answer_record = {
+                                        'relevance_score': eval_data.get('relevance', 0),
+                                        'star_score': eval_data.get('star', 0),
+                                        'accuracy_score': eval_data.get('accuracy', 0),
+                                        'communication_score': eval_data.get('communication', 0),
+                                        'overall_score': (eval_data.get('relevance', 0) + eval_data.get('star', 0) + eval_data.get('accuracy', 0) + eval_data.get('communication', 0)) / 4,
+                                        'top_strength': eval_data.get('feedback', 'Good response'),
+                                        'improvement_area': 'Keep practicing',
+                                        'interview_tip': eval_data.get('tip', 'Practice more')
+                                    }
+                                    st.session_state.answers_history.append(answer_record)
+                                    st.info("✅ Answer saved to your progress!")
                                     
                                 except Exception as e:
                                     st.error(f"Error: {str(e)}")
@@ -822,24 +863,175 @@ Return ONLY JSON."""
 
 # ================== TAB 4: PROGRESS ==================
 with tab4:
-    st.markdown("<h2 style='color: #00d4ff;'>📈 Progress Tracking</h2>", unsafe_allow_html=True)
-    st.markdown("Track your interview preparation journey.")
+    st.markdown("<h2 style='color: #00d4ff;'>📈 Progress Tracking & Analytics</h2>", unsafe_allow_html=True)
+    st.markdown("Track your interview preparation journey with detailed analytics.")
     st.divider()
     
+    # Get metrics
     metrics = db.get_progress_metrics(st.session_state.user_id)
     
+    # Display metrics
     col_p1, col_p2, col_p3, col_p4 = st.columns(4)
     with col_p1:
-        st.metric("📚 Sessions", metrics["total_sessions"])
+        st.metric("📚 Total Sessions", metrics["total_sessions"])
     with col_p2:
-        st.metric("🎤 Questions", metrics["total_answers"])
+        st.metric("🎤 Questions Answered", metrics["total_answers"])
     with col_p3:
-        st.metric("⭐ Avg Score", f"{metrics['average_score']}%")
+        st.metric("⭐ Average Score", f"{metrics['average_score']}%")
     with col_p4:
-        st.metric("👤 User", st.session_state.user_id[:10] + "...")
+        st.metric("👤 User ID", st.session_state.user_id[:12] + "...")
     
     st.divider()
-    st.info("📊 Detailed analytics coming soon!")
+    
+    # Show answers history
+    st.markdown("<h3 style='color: #38ef7d;'>📋 Your Practice Sessions</h3>", unsafe_allow_html=True)
+    
+    if len(st.session_state.answers_history) > 0:
+        st.markdown(f"**Total Answers Given:** {len(st.session_state.answers_history)}")
+        
+        st.divider()
+        
+        # Display each answer
+        for idx, answer in enumerate(st.session_state.answers_history, 1):
+            with st.expander(f"Question {idx} - Score: {answer.get('overall_score', 0):.1f}/100"):
+                col_exp1, col_exp2 = st.columns(2)
+                
+                with col_exp1:
+                    st.write("**Evaluation Scores:**")
+                    st.metric("Relevance", f"{answer.get('relevance_score', 0)}/100")
+                    st.metric("STAR Method", f"{answer.get('star_score', 0)}/100")
+                    st.metric("Accuracy", f"{answer.get('accuracy_score', 0)}/100")
+                    st.metric("Communication", f"{answer.get('communication_score', 0)}/100")
+                
+                with col_exp2:
+                    st.write("**Overall Score:**")
+                    overall = answer.get('overall_score', 0)
+                    score_color = "#38ef7d" if overall >= 70 else "#ff6b6b"
+                    
+                    st.markdown(f"""
+                    <div style='background: linear-gradient(135deg, {score_color} 0%, {"#38ef7d" if overall >= 70 else "#ee5a6f"} 100%); 
+                                padding: 20px; border-radius: 10px; text-align: center;'>
+                        <h2 style='color: white; margin: 0;'>{overall:.1f}/100</h2>
+                        <p style='color: white; margin: 0;'>
+                            {'Excellent!' if overall >= 80 else 'Good!' if overall >= 70 else 'Keep Practicing!'}
+                        </p>
+                    </div>
+                    """, unsafe_allow_html=True)
+                
+                st.divider()
+                
+                st.write("**Feedback & Tips:**")
+                st.write(f"💬 **Feedback:** {answer.get('top_strength', 'N/A')}")
+                st.write(f"📈 **Area to Improve:** {answer.get('improvement_area', 'N/A')}")
+                st.write(f"🎯 **Interview Tip:** {answer.get('interview_tip', 'N/A')}")
+        
+        st.divider()
+        
+        # Score progression chart
+        st.markdown("<h3 style='color: #38ef7d;'>📊 Score Progression</h3>", unsafe_allow_html=True)
+        
+        scores = [ans.get('overall_score', 0) for ans in st.session_state.answers_history]
+        
+        try:
+            import plotly.graph_objects as go
+            
+            fig = go.Figure()
+            fig.add_trace(go.Scatter(
+                y=scores,
+                mode='lines+markers',
+                name='Score',
+                line=dict(color='#00d4ff', width=3),
+                marker=dict(size=10, color='#38ef7d')
+            ))
+            
+            fig.update_layout(
+                title="Your Score Progression Over Time",
+                xaxis_title="Question Number",
+                yaxis_title="Score (0-100)",
+                hovermode='x unified',
+                template="plotly_dark",
+                height=400,
+                margin=dict(l=0, r=0, t=30, b=0)
+            )
+            
+            st.plotly_chart(fig, use_container_width=True)
+        except:
+            st.info("Chart loading...")
+        
+        # Statistics
+        st.divider()
+        st.markdown("<h3 style='color: #38ef7d;'>📈 Statistics</h3>", unsafe_allow_html=True)
+        
+        col_stat1, col_stat2, col_stat3, col_stat4 = st.columns(4)
+        
+        with col_stat1:
+            st.metric("Highest Score", f"{max(scores):.1f}/100" if scores else "N/A")
+        with col_stat2:
+            st.metric("Lowest Score", f"{min(scores):.1f}/100" if scores else "N/A")
+        with col_stat3:
+            avg = sum(scores) / len(scores) if scores else 0
+            st.metric("Average Score", f"{avg:.1f}/100")
+        with col_stat4:
+            trend = "📈 Improving" if len(scores) >= 2 and scores[-1] > scores[-2] else "📉 Declining" if len(scores) >= 2 else "➡️ First Answer"
+            st.metric("Trend", trend)
+        
+        st.divider()
+        
+        # Dimension analysis
+        st.markdown("<h3 style='color: #38ef7d;'>🎯 Score Breakdown by Dimension</h3>", unsafe_allow_html=True)
+        
+        relevance_scores = [ans.get('relevance_score', 0) for ans in st.session_state.answers_history]
+        star_scores = [ans.get('star_score', 0) for ans in st.session_state.answers_history]
+        accuracy_scores = [ans.get('accuracy_score', 0) for ans in st.session_state.answers_history]
+        communication_scores = [ans.get('communication_score', 0) for ans in st.session_state.answers_history]
+        
+        try:
+            import plotly.graph_objects as go
+            
+            fig_breakdown = go.Figure()
+            
+            fig_breakdown.add_trace(go.Scatter(y=relevance_scores, mode='lines+markers', name='Relevance', line=dict(color='#00d4ff')))
+            fig_breakdown.add_trace(go.Scatter(y=star_scores, mode='lines+markers', name='STAR Method', line=dict(color='#38ef7d')))
+            fig_breakdown.add_trace(go.Scatter(y=accuracy_scores, mode='lines+markers', name='Accuracy', line=dict(color='#667eea')))
+            fig_breakdown.add_trace(go.Scatter(y=communication_scores, mode='lines+markers', name='Communication', line=dict(color='#ff6b6b')))
+            
+            fig_breakdown.update_layout(
+                title="Performance by Dimension",
+                xaxis_title="Question Number",
+                yaxis_title="Score (0-100)",
+                hovermode='x unified',
+                template="plotly_dark",
+                height=400
+            )
+            
+            st.plotly_chart(fig_breakdown, use_container_width=True)
+        except:
+            st.info("Chart loading...")
+        
+    else:
+        st.markdown("""
+        <div class='info-card'>
+            <h3 style='margin: 0; color: white;'>📌 No Practice Sessions Yet</h3>
+            <p style='margin: 5px 0 0 0; color: #ecf0f1;'>
+                Go to the <strong>Interview Practice</strong> tab and answer some questions to see your progress here!
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        st.divider()
+        
+        st.markdown("""
+        <div style='background: rgba(0, 212, 255, 0.1); padding: 20px; border-radius: 10px; border-left: 4px solid #00d4ff;'>
+            <h4 style='margin: 0 0 10px 0; color: #00d4ff;'>How to Get Started:</h4>
+            <ol style='color: #ecf0f1; margin: 0; padding-left: 20px;'>
+                <li>Go to <strong>Resume Analysis</strong> tab → Upload your resume</li>
+                <li>Go to <strong>Interview Practice</strong> tab → Select mode (HR/Technical/Mock)</li>
+                <li>Generate questions and practice answering them</li>
+                <li>Get instant AI evaluation on STAR method</li>
+                <li>Check progress here to see your improvement!</li>
+            </ol>
+        </div>
+        """, unsafe_allow_html=True)
 
 # ================== TAB 5: ABOUT ==================
 with tab5:
