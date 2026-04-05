@@ -1,6 +1,3 @@
-Perfect! Here's the **COMPLETE README.md** without video section - ready to copy-paste:
-
-```markdown
 # CodeGuru: AI-Powered Interview Preparation System
 
 <div align="center">
