@@ -1,6 +1,3 @@
-Perfect! Here's the **COMPLETE README.md** without video section - ready to copy-paste:
-
-```markdown
 # CodeGuru: AI-Powered Interview Preparation System
 
 <div align="center">
@@ -8,12 +5,11 @@ Perfect! Here's the **COMPLETE README.md** without video section - ready to copy
 ![CodeGuru Logo](https://img.shields.io/badge/CodeGuru-AI%20Interview%20Coach-blue?style=for-the-badge)
 ![Python](https://img.shields.io/badge/Python-3.9%2B-green?style=for-the-badge)
 ![Streamlit](https://img.shields.io/badge/Streamlit-1.28-red?style=for-the-badge)
-![License](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)
 ![Status](https://img.shields.io/badge/Status-Production%20Ready-brightgreen?style=for-the-badge)
 
 **Transform Your Interview Preparation with AI-Powered Personalized Coaching**
 
-[Features](#-features) • [Installation](#-installation) • [Usage](#-usage) • [Tech Stack](#-tech-stack) • [Architecture](#-architecture) • [Contributing](#-contributing)
+[Features](#-features) • [Usage](#-usage) • [Tech Stack](#-tech-stack) • [Architecture](#-architecture) 
 
 </div>
 
@@ -331,7 +327,6 @@ After answering:
 
 
 </div>
-```
 
 ---
 
